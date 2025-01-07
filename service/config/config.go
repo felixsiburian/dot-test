@@ -23,6 +23,13 @@ func (c *Config) GetDBConfig() db.ConfigDB {
 	}
 }
 
+func (c *Config) GetRedisConfig() db.RedisConfig {
+	return db.RedisConfig{
+		Host: os.Getenv("REDIS_HOST"),
+		Port: os.Getenv("REDIST_PORT"),
+	}
+}
+
 func (c *Config) CatchError(err error) {
 	if err != nil {
 		panic(any(err))

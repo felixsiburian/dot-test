@@ -16,8 +16,14 @@ func start() {
 
 	app.CatchError(app.InitEnv())
 
+	//register db
 	dbConfig := app.GetDBConfig()
 	dbConn := db.ConnectionGorm(dbConfig)
 
+	//register redis
+	redisConfig := app.GetRedisConfig()
+	redisConn := db.RedisConnection(redisConfig)
+
 	fmt.Println("dbConn: ", dbConn)
+	fmt.Println("redisConn: ", redisConn)
 }
