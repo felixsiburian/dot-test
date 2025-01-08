@@ -16,5 +16,6 @@ func NewRouter(
 
 	r.POST("/user", u.Create)
 	r.GET("/user/:id", u.RetrieveById)
-	r.PATCH("/user/:id", u.UpdateEmail)
+	r.PATCH("/user/:id", u.UpdatePassword)
+	r.PUT("/user/edit", u.UpdatePassword)
 }

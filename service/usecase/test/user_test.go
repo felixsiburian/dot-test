@@ -28,7 +28,7 @@ func (m *MockUser) Create(user model.User) error {
 	return args.Error(0)
 }
 
-func (m *MockUser) UpdateEmail(email, id string) error {
+func (m *MockUser) UpdatePassword(email, id string) error {
 	args := m.Called(email, id)
 	return args.Error(0)
 }
@@ -36,6 +36,11 @@ func (m *MockUser) UpdateEmail(email, id string) error {
 func (m *MockUser) FindById(id string) (*model.User, error) {
 	args := m.Called(id)
 	return args.Get(0).(*model.User), args.Error(1)
+}
+
+func (m *MockUser) Update(user model.User) error {
+	args := m.Called(user)
+	return args.Error(0)
 }
 
 func (m *MockTools) HashPassword(password string) (string, error) {
@@ -85,41 +90,17 @@ func TestCreateUser_Success(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestUpdateEmail_Success(t *testing.T) {
-	s := setupRedisMock()
-	defer s.Close()
-
-	mockRedis := redis.NewClient(&redis.Options{
-		Addr: s.Addr(),
-	})
+func TestUpdatePassword_Success(t *testing.T) {
 	mockRepo := new(MockUser)
-	usecase := usecase.NewUserUsecase(mockRepo, mockRedis)
+	mockTools := new(MockTools)
+	usecase := usecase.NewUserUsecase(mockRepo, nil)
 
-	email := "newemail@example.com"
-	redisKey := "user-" + uuids.String()
-	expectedUser := &model.User{ID: uuids, Email: email}
+	mockTools.On("HashPassword", "password123").Return("hashedpassword123", nil)
+	mockRepo.On("UpdatePassword", mock.Anything, mock.Anything).Return(nil)
 
-	mockRedis.Del(redisKey)
+	err := usecase.UpdatePassword("hashedpassword123", uuids.String())
 
-	mockRepo.On("UpdateEmail", email, uuids).Return(nil)     // Simulate successful email update
-	mockRepo.On("FindById", uuids).Return(expectedUser, nil) // Simulate finding user data
-
-	// Call the function
-	err := usecase.UpdateEmail(email, uuids.String())
-
-	// Assertions
 	assert.NoError(t, err)
-	// Check if the key was set in the Redis store
-	storedUser, err := mockRedis.Get(redisKey).Result()
-	assert.NoError(t, err)
-
-	// Deserialize and check if the stored data matches
-	var user model.User
-	err = json.Unmarshal([]byte(storedUser), &user)
-	assert.NoError(t, err)
-	assert.Equal(t, expectedUser.Email, user.Email)
-
-	mockRepo.AssertExpectations(t)
 }
 
 func TestRetrieveById_Success(t *testing.T) {
@@ -142,4 +123,51 @@ func TestRetrieveById_Success(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, user)
 	assert.Equal(t, expectedUser, user)
+}
+
+func TestUpdate_Success(t *testing.T) {
+	mr, err := miniredis.Run()
+	assert.NoError(t, err)
+	defer mr.Close()
+
+	rdb := redis.NewClient(&redis.Options{
+		Addr: mr.Addr(),
+	})
+
+	mockUserRepo := new(MockUser)
+	mockTools := new(MockTools)
+
+	userUsecase := usecase.NewUserUsecase(mockUserRepo, rdb)
+
+	user := model.User{
+		ID:          uuids,
+		Email:       "user1@gmail.com",
+		Name:        "user 1",
+		Phonenumber: "081111111111",
+		Username:    "test1",
+		Password:    "hashedPass",
+	}
+
+	mockTools.On("Validate", user).Return(nil)
+
+	mockUserRepo.On("Update", user).Return(nil)
+
+	updatedUser := &model.User{
+		ID:   uuids,
+		Name: "user 1 updated",
+	}
+	mockUserRepo.On("FindById", mock.Anything).Return(updatedUser, nil)
+
+	err = userUsecase.Update(user)
+
+	assert.NoError(t, err)
+
+	redisKey := "user-" + uuids.String()
+	data, redisErr := rdb.Get(redisKey).Result()
+	assert.NoError(t, redisErr)
+
+	var redisUser model.User
+	json.Unmarshal([]byte(data), &redisUser)
+
+	assert.NoError(t, err)
 }

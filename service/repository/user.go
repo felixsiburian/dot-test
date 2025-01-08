@@ -12,6 +12,21 @@ type UserRepository struct {
 	db *gorm.DB
 }
 
+func (u UserRepository) Update(payload model.User) (err error) {
+	if err := u.db.Debug().Table("user").Updates(&model.User{
+		Email:       payload.Email,
+		Name:        payload.Name,
+		Phonenumber: payload.Phonenumber,
+		Username:    payload.Username,
+		Password:    payload.Password,
+		Updatedat:   time.Now(),
+	}).Where("id = ?", payload.ID).Error; err != nil {
+		return tools.Wrap(err)
+	}
+
+	return nil
+}
+
 func (u UserRepository) FindById(id string) (*model.User, error) {
 	var res model.User
 	err := u.db.Debug().Table("user").Select("id,email,name,phonenumber,username,createdat,updatedat,deletedat").Where("id = ?", id).First(&res).Error
@@ -22,8 +37,8 @@ func (u UserRepository) FindById(id string) (*model.User, error) {
 	return &res, nil
 }
 
-func (u UserRepository) UpdateEmail(email, id string) (err error) {
-	if err := u.db.Debug().Table("user").Where("id = ? ", id).Update("email", email).Error; err != nil {
+func (u UserRepository) UpdatePassword(password, id string) (err error) {
+	if err := u.db.Debug().Table("user").Where("id = ? ", id).Update("password", password).Error; err != nil {
 		return tools.Wrap(err)
 	}
 

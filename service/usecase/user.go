@@ -18,13 +18,12 @@ var (
 	userKey = "user-"
 )
 
-func (u userUsecase) UpdateEmail(email string, id string) error {
-	if id == "" || email == "" {
-		err := errors.New("invalid request")
+func (u userUsecase) Update(user model.User) error {
+	if err := tools.Validate(user); err != nil {
 		return tools.Wrap(err)
 	}
 
-	redisKey := userKey + id
+	redisKey := userKey + user.ID.String()
 	userData, err := u.redisClient.Get(redisKey).Result()
 	if err != nil && err != redis.Nil {
 		return tools.Wrap(err)
@@ -34,19 +33,33 @@ func (u userUsecase) UpdateEmail(email string, id string) error {
 		u.redisClient.Del(redisKey)
 	}
 
-	if err := u.userRepo.UpdateEmail(email, id); err != nil {
+	if err := u.userRepo.Update(user); err != nil {
 		return tools.Wrap(err)
 	}
 
-	user, err := u.userRepo.FindById(id)
+	userRes, err := u.userRepo.FindById(user.ID.String())
 	if err != nil {
 		return tools.Wrap(err)
 	}
 
-	userStr, _ := json.Marshal(user)
+	userStr, _ := json.Marshal(userRes)
 	u.redisClient.Set(redisKey, string(userStr), 0)
 
 	return nil
+}
+
+func (u userUsecase) UpdatePassword(password string, id string) error {
+	if id == "" || password == "" {
+		err := errors.New("invalid request")
+		return tools.Wrap(err)
+	}
+
+	newPassword, err := tools.HashPassword(password)
+	if err != nil {
+		return tools.Wrap(err)
+	}
+
+	return u.userRepo.UpdatePassword(newPassword, id)
 }
 
 func (u userUsecase) RetrieveById(id string) (*model.User, error) {

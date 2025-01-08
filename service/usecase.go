@@ -7,5 +7,6 @@ import (
 type IUserUsecase interface {
 	Create(request model.User) (err error)
 	RetrieveById(id string) (*model.User, error)
-	UpdateEmail(email string, id string) error
+	UpdatePassword(password string, id string) error
+	Update(user model.User) error
 }

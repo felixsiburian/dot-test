@@ -55,9 +55,9 @@ func (h *UserHandler) RetrieveById(e echo.Context) error {
 	})
 }
 
-func (h *UserHandler) UpdateEmail(e echo.Context) error {
+func (h *UserHandler) UpdatePassword(e echo.Context) error {
 	var request struct {
-		Email string `json:"email"`
+		Password string `json:"password"`
 	}
 
 	var id = e.Param("id")
@@ -67,7 +67,24 @@ func (h *UserHandler) UpdateEmail(e echo.Context) error {
 		return e.JSON(http.StatusUnprocessableEntity, err)
 	}
 
-	if err := h.userUsecase.UpdateEmail(request.Email, id); err != nil {
+	if err := h.userUsecase.UpdatePassword(request.Password, id); err != nil {
+		return e.JSON(http.StatusInternalServerError, err)
+	}
+
+	return e.JSON(http.StatusOK, map[string]interface{}{
+		"message": "success",
+	})
+}
+
+func (h *UserHandler) Update(e echo.Context) error {
+	var request model.User
+
+	if err := json.NewDecoder(e.Request().Body).Decode(&request); err != nil {
+		err = fmt.Errorf("invalid request")
+		return e.JSON(http.StatusUnprocessableEntity, err)
+	}
+
+	if err := h.userUsecase.Update(request); err != nil {
 		return e.JSON(http.StatusInternalServerError, err)
 	}
 
