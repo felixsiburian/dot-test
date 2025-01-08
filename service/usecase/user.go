@@ -33,6 +33,11 @@ func (u userUsecase) Update(user model.User) error {
 		u.redisClient.Del(redisKey)
 	}
 
+	user.Password, err = tools.HashPassword(user.Password)
+	if err != nil {
+		return tools.Wrap(err)
+	}
+
 	if err := u.userRepo.Update(user); err != nil {
 		return tools.Wrap(err)
 	}
