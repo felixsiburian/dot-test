@@ -43,6 +43,11 @@ func (m *MockUser) Update(user model.User) error {
 	return args.Error(0)
 }
 
+func (m *MockUser) Delete(id string) error {
+	args := m.Called(id)
+	return args.Error(0)
+}
+
 func (m *MockTools) HashPassword(password string) (string, error) {
 	args := m.Called(password)
 	return args.String(0), args.Error(1)
@@ -170,4 +175,31 @@ func TestUpdate_Success(t *testing.T) {
 	json.Unmarshal([]byte(data), &redisUser)
 
 	assert.NoError(t, err)
+}
+
+func TestDelete_Success(t *testing.T) {
+	mr, err := miniredis.Run()
+	assert.NoError(t, err)
+	defer mr.Close()
+
+	rdb := redis.NewClient(&redis.Options{
+		Addr: mr.Addr(),
+	})
+
+	mockUserRepo := new(MockUser)
+
+	userUsecase := usecase.NewUserUsecase(mockUserRepo, rdb)
+
+	redisKey := "user-" + uuids.String()
+
+	mockUserRepo.On("Delete", uuids.String()).Return(nil)
+
+	err = userUsecase.Delete(uuids.String())
+
+	assert.NoError(t, err)
+
+	_, redisErr := mr.Get(redisKey)
+	assert.Error(t, redisErr)
+
+	mockUserRepo.AssertExpectations(t)
 }

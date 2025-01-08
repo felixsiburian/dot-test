@@ -9,4 +9,5 @@ type IUserUsecase interface {
 	RetrieveById(id string) (*model.User, error)
 	UpdatePassword(password string, id string) error
 	Update(user model.User) error
+	Delete(id string) error
 }

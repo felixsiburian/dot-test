@@ -9,4 +9,5 @@ type IUserRepository interface {
 	UpdatePassword(password, id string) (err error)
 	FindById(id string) (*model.User, error)
 	Update(payload model.User) (err error)
+	Delete(id string) error
 }

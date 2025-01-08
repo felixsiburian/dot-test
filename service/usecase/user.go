@@ -9,14 +9,33 @@ import (
 	"github.com/go-redis/redis"
 )
 
+var (
+	userKey = "user-"
+)
+
 type userUsecase struct {
 	userRepo    service.IUserRepository
 	redisClient *redis.Client
 }
 
-var (
-	userKey = "user-"
-)
+func (u userUsecase) Delete(id string) error {
+	if id == "" {
+		err := errors.New("invalid request")
+		return tools.Wrap(err)
+	}
+
+	redisKey := userKey + id
+	userData, err := u.redisClient.Get(redisKey).Result()
+	if err != nil && err != redis.Nil {
+		return tools.Wrap(err)
+	}
+
+	if userData != "" {
+		u.redisClient.Del(redisKey)
+	}
+
+	return u.userRepo.Delete(id)
+}
 
 func (u userUsecase) Update(user model.User) error {
 	if err := tools.Validate(user); err != nil {

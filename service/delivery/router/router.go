@@ -18,4 +18,5 @@ func NewRouter(
 	r.GET("/user/:id", u.RetrieveById)
 	r.PATCH("/user/:id", u.UpdatePassword)
 	r.PUT("/user/edit", u.Update)
+	r.DELETE("/user/:id", u.Delete)
 }

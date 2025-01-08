@@ -92,3 +92,15 @@ func (h *UserHandler) Update(e echo.Context) error {
 		"message": "success",
 	})
 }
+
+func (h *UserHandler) Delete(e echo.Context) error {
+	var id = e.Param("id")
+
+	if err := h.userUsecase.Delete(id); err != nil {
+		return e.JSON(http.StatusInternalServerError, err)
+	}
+
+	return e.JSON(http.StatusOK, map[string]interface{}{
+		"message": "success",
+	})
+}

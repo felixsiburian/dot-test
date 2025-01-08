@@ -12,6 +12,14 @@ type UserRepository struct {
 	db *gorm.DB
 }
 
+func (u UserRepository) Delete(id string) error {
+	if err := u.db.Debug().Table("user").Delete("id = ?").Where("id = ?", id).Error; err != nil {
+		return tools.Wrap(err)
+	}
+
+	return nil
+}
+
 func (u UserRepository) Update(payload model.User) (err error) {
 	if err := u.db.Debug().Table("user").Updates(&model.User{
 		Email:       payload.Email,
