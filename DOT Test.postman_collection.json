@@ -1,0 +1,136 @@
+{
+	"info": {
+		"_postman_id": "10efd4d5-b670-4d9e-9123-d3a8ed6201ef",
+		"name": "DOT Test",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "4760244"
+	},
+	"item": [
+		{
+			"name": "create",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\":\"user2@gmail.com\",\n    \"name\":\"user 2\",\n    \"phonenumber\":\"0899123449003\",\n    \"username\":\"user2\",\n    \"password\":\"user2\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/v1/user",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"user"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "retrieve by id",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/v1/user/d5377c62-119a-41d0-b59f-dff3f7646fec",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"user",
+						"d5377c62-119a-41d0-b59f-dff3f7646fec"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Email",
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\":\"user321@gmail.com\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/v1/user/d5377c62-119a-41d0-b59f-dff3f7646fec",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"user",
+						"d5377c62-119a-41d0-b59f-dff3f7646fec"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Edit User",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"id\":\"d5377c62-119a-41d0-b59f-dff3f7646fec\",\n    \"email\":\"user3@gmail.com\",\n    \"name\":\"user 3\",\n    \"phonenumber\":\"0899123449003\",\n    \"username\":\"user3\",\n    \"password\":\"user3\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:8080/v1/user/edit",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"user",
+						"edit"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete User",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "localhost:8080/v1/user/d5377c62-119a-41d0-b59f-dff3f7646fec",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"v1",
+						"user",
+						"d5377c62-119a-41d0-b59f-dff3f7646fec"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
