@@ -33,7 +33,7 @@ func start() {
 
 	userRepo := repository.NewUserRepository(dbConn)
 
-	userUsecase := usecase.NewUserUsecase(userRepo)
+	userUsecase := usecase.NewUserUsecase(userRepo, redisConn)
 
 	router.NewRouter(e, userUsecase)
 
