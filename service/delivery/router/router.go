@@ -15,4 +15,6 @@ func NewRouter(
 	r := e.Group("/v1")
 
 	r.POST("/user", u.Create)
+	r.GET("/user/:id", u.RetrieveById)
+	r.PATCH("/user/:id", u.UpdateEmail)
 }

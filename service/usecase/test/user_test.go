@@ -3,12 +3,15 @@ package test
 import (
 	"dot-test/service/model"
 	"dot-test/service/usecase"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"testing"
 )
 
-type MockUserRepo struct {
+var uuids = uuid.New()
+
+type MockUser struct {
 	mock.Mock
 }
 
@@ -16,9 +19,19 @@ type MockTools struct {
 	mock.Mock
 }
 
-func (m *MockUserRepo) Create(user model.User) error {
+func (m *MockUser) Create(user model.User) error {
 	args := m.Called(user)
 	return args.Error(0)
+}
+
+func (m *MockUser) UpdateEmail(email, id string) error {
+	args := m.Called(email, id)
+	return args.Error(0)
+}
+
+func (m *MockUser) FindById(id string) (*model.User, error) {
+	args := m.Called(id)
+	return args.Get(0).(*model.User), args.Error(1)
 }
 
 func (m *MockTools) HashPassword(password string) (string, error) {
@@ -32,7 +45,7 @@ func (m *MockTools) Validate(user model.User) error {
 }
 
 func TestCreateUser_Success(t *testing.T) {
-	mockRepo := new(MockUserRepo)
+	mockRepo := new(MockUser)
 	mockTools := new(MockTools)
 
 	usecase := usecase.NewUserUsecase(mockRepo)
@@ -52,4 +65,32 @@ func TestCreateUser_Success(t *testing.T) {
 	err := usecase.Create(request)
 
 	assert.NoError(t, err)
+}
+
+func TestUpdateEmail_Success(t *testing.T) {
+	mockRepo := new(MockUser)
+	usecase := usecase.NewUserUsecase(mockRepo)
+
+	mockRepo.On("UpdateEmail", "test@example.com", "123").Return(nil)
+
+	err := usecase.UpdateEmail("test@example.com", "123")
+
+	assert.NoError(t, err)
+	mockRepo.AssertCalled(t, "UpdateEmail", "test@example.com", "123")
+}
+
+func TestRetrieveById_Success(t *testing.T) {
+	mockRepo := new(MockUser)
+	usecase := usecase.NewUserUsecase(mockRepo)
+
+	expectedUser := &model.User{ID: uuids, Email: "test@example.com"} // Use uuid.UUID type for ID
+
+	mockRepo.On("FindById", uuids.String()).Return(expectedUser, nil) // Mock expects string input but returns the correct struct
+
+	user, err := usecase.RetrieveById(uuids.String())
+
+	assert.NoError(t, err)
+	assert.NotNil(t, user)
+	assert.Equal(t, expectedUser, user)
+	mockRepo.AssertCalled(t, "FindById", uuids.String())
 }
